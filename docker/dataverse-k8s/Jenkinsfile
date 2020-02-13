@@ -26,7 +26,7 @@ pipeline {
     stage('checkout') {
       steps { checkout scm }
     }
-    stage('build') {
+    stage('build+scan') {
       when {
         anyOf {
           changeset "docker/dataverse-k8s/**"
@@ -34,9 +34,20 @@ pipeline {
           tag ""
         }
       }
-      steps {
-        script {
-          docker_image = docker.build("${env.DOCKER_IMAGE_NAME}:${env.DOCKER_IMAGE_TAG}", "--pull -f ${env.DOCKER_FILE} ${env.DOCKER_WORKDIR}")
+      stages {
+        stage('build') {
+          steps {
+            script {
+              docker_image = docker.build("${env.DOCKER_IMAGE_NAME}:${env.DOCKER_IMAGE_TAG}", "--pull -f ${env.DOCKER_FILE} ${env.DOCKER_WORKDIR}")
+            }
+          }
+        }
+        stage('scan') {
+          steps {
+            script {
+              sh "curl -s https://ci-tools.anchore.io/inline_scan-v0.6.1 | bash -s -- -d ${env.DOCKER_FILE} ${env.DOCKER_IMAGE_NAME}:${env.DOCKER_IMAGE_TAG}"
+            }
+          }
         }
       }
     }
