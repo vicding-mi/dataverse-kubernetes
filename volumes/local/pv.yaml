@@ -1,0 +1,95 @@
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: dataverse-docroot-pv
+  namespace: default
+spec:
+  capacity:
+    storage: 5Gi
+  volumeMode: Filesystem
+  accessModes:
+  - ReadWriteOnce
+  persistentVolumeReclaimPolicy: Delete
+  storageClassName: generic
+  local:
+    path: /mnt/disks/ssd1
+  nodeAffinity:
+    required:
+      nodeSelectorTerms:
+      - matchExpressions:
+        - key: beta.kubernetes.io/os
+          operator: In
+          values:
+          - linux
+---
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: dataverse-files-pv
+  namespace: default
+spec:
+  capacity:
+    storage: 5Gi
+  volumeMode: Filesystem
+  accessModes:
+  - ReadWriteOnce
+  persistentVolumeReclaimPolicy: Delete
+  storageClassName: generic
+  local:
+    path: /mnt/disks/ssd2
+  nodeAffinity:
+    required:
+      nodeSelectorTerms:
+      - matchExpressions:
+        - key: beta.kubernetes.io/os
+          operator: In
+          values:
+          - linux
+---
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: solr-pv
+  namespace: default
+spec:
+  capacity:
+    storage: 5Gi
+  volumeMode: Filesystem
+  accessModes:
+  - ReadWriteOnce
+  persistentVolumeReclaimPolicy: Delete
+  storageClassName: generic
+  local:
+    path: /mnt/disks/ssd3
+  nodeAffinity:
+    required:
+      nodeSelectorTerms:
+      - matchExpressions:
+        - key: beta.kubernetes.io/os
+          operator: In
+          values:
+          - linux
+---
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: postgresql-pv
+  namespace: default
+spec:
+  capacity:
+    storage: 5Gi
+  volumeMode: Filesystem
+  accessModes:
+  - ReadWriteOnce
+  persistentVolumeReclaimPolicy: Delete
+  storageClassName: generic
+  local:
+    path: /mnt/disks/ssd4
+  nodeAffinity:
+    required:
+      nodeSelectorTerms:
+      - matchExpressions:
+        - key: beta.kubernetes.io/os
+          operator: In
+          values:
+          - linux
