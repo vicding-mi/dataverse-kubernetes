@@ -7,4 +7,4 @@ mkdir /mnt/disks/ssd2
 mkdir /mnt/disks/ssd3
 mkdir /mnt/disks/ssd4
 # Declare local volumes bound on created folders
-kubectl apply -f ./volumes/local/pv.yaml
+kubectl apply -f https://raw.githubusercontent.com/EOSC-synergy/dataverse-kubernetes/linux/volumes/local/pv.yaml
