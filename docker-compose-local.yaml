@@ -1,5 +1,10 @@
 version: '3.5'
 
+volumes:
+  postgresql_data:
+  solr_data:
+  dataverse_data:
+
 services:
   postgresql:
     container_name: postgresql
@@ -14,12 +19,16 @@ services:
     env_file: .env
     expose:
       - 5432
+    volumes:
+    - postgresql_data:/var/lib/postgresql/data
 
   solr:
     container_name: solr
     image: iqss/solr-k8s
     expose:
       - 8983
+    volumes:
+    - solr_data:/opt/solr/server/solr/collection1/data
 
   dataverse:
     container_name: dataverse
@@ -35,6 +44,7 @@ services:
       - 8080:8080
     env_file: .env
     volumes:
+      - dataverse_data:/data
       - type: bind
         source: ./personas/docker-compose/secrets
         target: /secrets
