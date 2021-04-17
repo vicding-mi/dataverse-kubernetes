@@ -1,10 +1,5 @@
 version: '3.5'
 
-volumes:
-  postgresql_data:
-  solr_data:
-  dataverse_data:
-
 services:
   postgresql:
     container_name: postgresql
@@ -20,7 +15,7 @@ services:
     expose:
       - 5432
     volumes:
-    - postgresql_data:/var/lib/postgresql/data
+    - ./data/postgresql_data:/var/lib/postgresql/data
 
   solr:
     container_name: solr
@@ -28,7 +23,7 @@ services:
     expose:
       - 8983
     volumes:
-    - solr_data:/opt/solr/server/solr/collection1/data
+    - ./data/solr_data:/opt/solr/server/solr/collection1/data
 
   dataverse:
     container_name: dataverse
@@ -44,7 +39,7 @@ services:
       - 8080:8080
     env_file: .env
     volumes:
-      - dataverse_data:/data
+      - ./data/dataverse_data:/data
       - type: bind
         source: ./personas/docker-compose/secrets
         target: /secrets
