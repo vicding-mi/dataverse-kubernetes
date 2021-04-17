@@ -2,7 +2,7 @@ version: '3.5'
 
 volumes:
   postgresql_data:
-  solor_data:
+  solr_data:
   dataverse_data:
 
 services:
