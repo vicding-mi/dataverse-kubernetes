@@ -1,2 +1,8 @@
 .idea
 .idea/*
+
+data
+data/*
+
+personas/docker-compose/secrets
+personas/docker-compose/secrets/*

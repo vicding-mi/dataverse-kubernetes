@@ -44,3 +44,12 @@ services:
         source: ./personas/docker-compose/secrets
         target: /secrets
         #read_only: true
+
+  dbgui:
+    container_name: dbgui
+    image: adminer
+    ports:
+      - 8089:8080
+    depends_on:
+      - postgresql
+
