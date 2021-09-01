@@ -6,3 +6,6 @@ data/*
 
 personas/docker-compose/secrets
 personas/docker-compose/secrets/*
+
+letsencrypt
+letsencrypt/*

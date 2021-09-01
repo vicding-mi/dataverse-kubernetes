@@ -1,6 +1,39 @@
 version: '3.5'
 
+networks:
+  traefik:
+
 services:
+  reverse-proxy:
+    container_name: traefik
+    # The official v2 Traefik docker image
+    image: traefik:v2.2
+    # Enables the web UI and tells Traefik to listen to docker
+    command:
+      - "--api.insecure=true"
+      - "--providers.docker=true"
+      - "--providers.docker.exposedByDefault=false"
+      - "--providers.docker.network=traefik"
+      - "--entrypoints.web.address=:80"
+    ports:
+      # The HTTP port
+      - "80:80"
+      # The Web UI (enabled by --api.insecure=true)
+      - "8089:8080"
+    volumes:
+      # So that Traefik can listen to the Docker events
+      - /var/run/docker.sock:/var/run/docker.sock
+      # volume to store letsencrypt certificates
+      - "./letsencrypt:/letsencrypt"
+    networks:
+      - traefik
+
+  whoami:
+    # A container that exposes an API to show its IP address
+    image: traefik/whoami
+    labels:
+      - "traefik.http.routers.whoami.rule=Host(`whoami.docker.localhost`)"
+
   postgresql:
     container_name: postgresql
     image: library/postgres:10.13
@@ -15,7 +48,9 @@ services:
     expose:
       - 5432
     volumes:
-    - ./data/postgresql_data:/var/lib/postgresql/data
+      - ./data/postgresql_data:/var/lib/postgresql/data
+    networks:
+      - traefik
 
   solr:
     container_name: solr
@@ -23,7 +58,13 @@ services:
     expose:
       - 8983
     volumes:
-    - ./data/solr_data:/opt/solr/server/solr/collection1/data
+      - ./data/solr_data:/opt/solr/server/solr/collection1/data
+    networks:
+      - traefik
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.solr.rule=Host(`solr.${traefikhost}`)"
+      - "traefik.http.services.solr.loadbalancer.server.port=8983"
 
   dataverse:
     container_name: dataverse
@@ -44,12 +85,19 @@ services:
         source: ./personas/docker-compose/secrets
         target: /secrets
         #read_only: true
+    networks:
+      - traefik
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.dataverse.rule=Host(`dataverse.docker.localdomain`)"
+      - "traefik.http.services.dataverse.loadbalancer.server.port=8080"
+#      - "traefik.http.middlewares.test-ipwhitelist.ipwhitelist.sourcerange=127.0.0.1/32"
 
-  dbgui:
-    container_name: dbgui
-    image: adminer
-    ports:
-      - 8089:8080
-    depends_on:
-      - postgresql
+#  dbgui:
+#    container_name: dbgui
+#    image: adminer
+#    ports:
+#      - 8089:8080
+#    depends_on:
+#      - postgresql
 
