@@ -9,7 +9,7 @@ services:
       - "--providers.docker=true"
     ports:
       - "80:80"
-#      - "8089:8080"
+      - "8080:8080"
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
       - "./letsencrypt:/letsencrypt"
@@ -34,8 +34,10 @@ services:
     volumes:
       - ./data/solr_data:/opt/solr/server/solr/collection1/data
     labels:
-      - "traefik.http.routers.solr.rule=Host(`solr.${traefikhost}`)"
+      - "traefik.http.routers.solr.rule=Host(`solr.${DEVHOSTNAME}`)"
       - "traefik.http.services.solr.loadbalancer.server.port=8983"
+      - "traefik.http.middlewares.solr.ipwhitelist.sourcerange=127.0.0.1/32, 0.0.0.0/0"
+      - "traefik.http.routers.solr.middlewares=solr@docker"
 
   dataverse:
     container_name: dataverse
@@ -54,7 +56,7 @@ services:
         source: ./personas/docker-compose/secrets
         target: /secrets
     labels:
-      - "traefik.http.routers.dataverse.rule=Host(`dv.docker.localhost`)"
+      - "traefik.http.routers.dataverse.rule=Host(`${DEVHOSTNAME}`)"
       - "traefik.http.middlewares.dataverse.ipwhitelist.sourcerange=127.0.0.1/32, 0.0.0.0/0"
       - "traefik.http.routers.dataverse.middlewares=dataverse@docker"
       - "traefik.http.services.dataverse.loadbalancer.server.port=8080"
@@ -65,7 +67,7 @@ services:
     depends_on:
       - postgresql
     labels:
-      - "traefik.http.routers.dbgui.rule=Host(`dbgui.docker.localhost`)"
+      - "traefik.http.routers.dbgui.rule=Host(`dbgui.${DEVHOSTNAME}`)"
       - "traefik.http.middlewares.dbgui.ipwhitelist.sourcerange=127.0.0.1/32, 0.0.0.0/0"
       - "traefik.http.routers.dbgui.middlewares=dbgui@docker"
       - "traefik.http.services.dbgui.loadbalancer.server.port=8080"
