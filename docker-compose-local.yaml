@@ -5,11 +5,14 @@ services:
     container_name: traefik
     image: traefik:v2.5
     command:
+      - "--entrypoints.http.address=:80"
+      - "--entrypoints.contact-web.address=:8085"
       - "--api.insecure=true"
       - "--providers.docker=true"
     ports:
       - "80:80"
       - "8080:8080"
+      - "8085:8085"
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
       - "./letsencrypt:/letsencrypt"
@@ -31,6 +34,7 @@ services:
   solr:
     container_name: solr
     image: iqss/solr-k8s
+#    image: ekoindarto/solr:8.9.0
     volumes:
       - ./data/solr_data:/opt/solr/server/solr/collection1/data
     labels:
@@ -38,6 +42,7 @@ services:
       - "traefik.http.services.solr.loadbalancer.server.port=8983"
       - "traefik.http.middlewares.solr.ipwhitelist.sourcerange=127.0.0.1/32, 0.0.0.0/0"
       - "traefik.http.routers.solr.middlewares=solr@docker"
+      - "traefik.http.routers.solr.entrypoints=http"
 
   dataverse:
     container_name: dataverse
@@ -46,6 +51,7 @@ services:
     build:
       context: .
       dockerfile: ./docker/dataverse-k8s/payara/Dockerfile
+#    image: ekoindarto/dataverse:5.7.beta-20210930
     depends_on:
       - postgresql
       - solr
@@ -60,6 +66,7 @@ services:
       - "traefik.http.middlewares.dataverse.ipwhitelist.sourcerange=127.0.0.1/32, 0.0.0.0/0"
       - "traefik.http.routers.dataverse.middlewares=dataverse@docker"
       - "traefik.http.services.dataverse.loadbalancer.server.port=8080"
+      - "traefik.http.routers.dataverse.entrypoints=http"
 
   dbgui:
     container_name: dbgui
@@ -71,3 +78,16 @@ services:
       - "traefik.http.middlewares.dbgui.ipwhitelist.sourcerange=127.0.0.1/32, 0.0.0.0/0"
       - "traefik.http.routers.dbgui.middlewares=dbgui@docker"
       - "traefik.http.services.dbgui.loadbalancer.server.port=8080"
+      - "traefik.http.routers.dbgui.entrypoints=http"
+
+  contact-web:
+    image: nginx:latest
+    container_name: contact-web
+    volumes:
+      - ./index.html:/usr/share/nginx/html/index.html
+    labels:
+      - "traefik.http.routers.contact-web.rule=Host(`${DEVHOSTNAME}`)"
+      - "traefik.http.middlewares.contact-web.ipwhitelist.sourcerange=127.0.0.1/32, 0.0.0.0/0"
+      - "traefik.http.routers.contact-web.middlewares=contact-web@docker"
+      - "traefik.http.services.contact-web.loadbalancer.server.port=80"
+      - "traefik.http.routers.contact-web.entrypoints=contact-web"
